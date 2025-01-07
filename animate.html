@@ -1,0 +1,59 @@
+<html>
+    <head>
+
+    </head>
+    <body>
+        <img src="assets/game_bg_01_001.png" id="img_background" style="display: none;">
+        <img src="assets/grounds/groundSquare_01_001.png" id="img_ground" style="display: none;">
+        <canvas id="canvas" width="1024" height="512"></canvas>
+    </body>
+    <script src="src/game_element.js"></script>
+    <script src="src/position.js"></script>
+    <script>
+        const canvas = document.querySelector("canvas");
+        const context = canvas.getContext("2d");
+
+        let background = new BackGround(context, 'img_background');
+        let ground = new Ground(context, 'img_ground');
+        let hero = new Hero(context);
+        hero.position = new Position(200, 512-228);
+
+        let particules = [];
+        for(let i = 0; i < 10; i++){
+            let particule = new Particule(context, Math.random() * 20);
+            particule.position = { ...hero.position};
+            particule.position.x -= particule.width;
+            particule.position.y += 100 - Math.random() * 50;
+            particules.push(particule);
+        }
+
+        function draw(){
+            background.draw();
+            ground.draw();
+            ground.next();
+            background.next();
+            hero.draw();
+
+            for(let particule of particules){
+                particule.draw();
+                particule.next();
+
+                if(particule.position.y - particule.width > ground.position.y){
+                    particule.position.y = ground.position.y - particule.width;
+                }
+            }
+            particules = particules.filter((particule) => particule.position.x > 0);
+
+            if(Math.random() < 0.2){
+                let particule = new Particule(context, Math.random() * 20);
+                particule.position = { ...hero.position};
+                particule.position.y = hero.tmp_y;
+                particule.position.x -= particule.width;
+                particule.position.y += 100 - Math.random() * 50;
+                particules.push(particule);
+            }
+            setTimeout(draw, 20);
+        }
+        window.onload = draw;
+    </script>
+</html>
